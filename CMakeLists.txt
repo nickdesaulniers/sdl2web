@@ -7,3 +7,6 @@ find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIR})
 target_link_libraries(main ${SDL2_LIBRARY})
 
+find_package(OpenGL REQUIRED)
+target_link_libraries(main ${OPENGL_LIBRARIES})
+
