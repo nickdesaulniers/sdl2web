@@ -23,39 +23,8 @@ int main () {
     return 1;
   }
 
-  auto ren = SDL_CreateRenderer(win, -1,
-      SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-  if (ren == nullptr) {
-    SDL_DestroyWindow(win);
-    std::cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
-    SDL_Quit();
-    return 1;
-  }
-
-  auto imagePath = std::string { "../hello.bmp" };
-  auto bmp = SDL_LoadBMP(imagePath.c_str());
-  if (bmp == nullptr) {
-    SDL_DestroyRenderer(ren);
-    SDL_DestroyWindow(win);
-    std::cout << "SDL_LoadBMP Error: " << SDL_GetError() << std::endl;
-    SDL_Quit();
-    return 1;
-  }
-
-  auto tex = SDL_CreateTextureFromSurface(ren, bmp);
-  SDL_FreeSurface(bmp);
-  if (tex == nullptr) {
-    SDL_DestroyRenderer(ren);
-    SDL_DestroyWindow(win);
-    std::cout << "SDL_CreateTextureFromSurface Error: " << SDL_GetError() <<
-      std::endl;
-    SDL_Quit();
-    return 1;
-  }
-
   auto gl = SDL_GL_CreateContext(win);
   if (gl == nullptr) {
-    SDL_DestroyRenderer(ren);
     SDL_DestroyWindow(win);
     std::cout << "SDL_GL_CreateContext Error: " << SDL_GetError() << std::endl;
     SDL_Quit();
@@ -83,14 +52,6 @@ int main () {
   /* Delete our opengl context, destroy our window, and shutdown SDL */
   SDL_GL_DeleteContext(gl);
 
-  //SDL_RenderClear(ren);
-  //SDL_RenderCopy(ren, tex, nullptr, nullptr);
-  //SDL_RenderPresent(ren);
-
-  //SDL_Delay(2000);
-
-  SDL_DestroyTexture(tex);
-  SDL_DestroyRenderer(ren);
   SDL_DestroyWindow(win);
   SDL_Quit();
 }
