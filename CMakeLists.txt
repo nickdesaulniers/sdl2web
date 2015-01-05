@@ -7,11 +7,14 @@ if (NOT EMSCRIPTEN)
   find_package(SDL2 REQUIRED)
   include_directories(${SDL2_INCLUDE_DIR})
   target_link_libraries(main ${SDL2_LIBRARY})
-  add_definitions(-std=c++14)
+  #add_definitions(-std=c++14)
+  set(CMAKE_CXX_FLAGS "-std=c++11")
 
   find_package(OpenGL REQUIRED)
   target_link_libraries(main ${OPENGL_LIBRARIES})
 endif()
+
+#set(CMAKE_XCODE_ATTRIBUTE_SUPPORTED_PLATFORMS "iOS")
 
 if (EMSCRIPTEN)
   set(CMAKE_EXECUTABLE_SUFFIX ".html")
