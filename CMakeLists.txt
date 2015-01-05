@@ -15,6 +15,7 @@ endif()
 
 if (EMSCRIPTEN)
   set(CMAKE_EXECUTABLE_SUFFIX ".html")
-  add_definitions(-s USE_SDL=2 -std=c++1y)
+  add_definitions(-std=c++1y)
+  set_target_properties(main PROPERTIES LINK_FLAGS "-s USE_SDL=2")
 endif()
 
