@@ -8,10 +8,10 @@ if (NOT EMSCRIPTEN)
   include_directories(${SDL2_INCLUDE_DIR})
   target_link_libraries(main ${SDL2_LIBRARY})
   add_definitions(-std=c++14)
-endif()
 
-find_package(OpenGL REQUIRED)
-target_link_libraries(main ${OPENGL_LIBRARIES})
+  find_package(OpenGL REQUIRED)
+  target_link_libraries(main ${OPENGL_LIBRARIES})
+endif()
 
 if (EMSCRIPTEN)
   set(CMAKE_EXECUTABLE_SUFFIX ".html")
