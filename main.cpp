@@ -51,6 +51,7 @@ GLuint load_program () {
     "void main () {\n"
     "  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
     "}";
+  // TODO: error handling
   GLuint vertexShader = load_shader(GL_VERTEX_SHADER, vShaderStr);
   GLuint fragmentShader = load_shader(GL_FRAGMENT_SHADER, fShaderStr);
   GLuint program = glCreateProgram();
@@ -58,7 +59,6 @@ GLuint load_program () {
     return 0;
   }
 
-  // TODO: error handling
   glAttachShader(program, vertexShader);
   glAttachShader(program, fragmentShader);
 
@@ -146,8 +146,14 @@ int main () {
 #ifdef __EMSCRIPTEN__
   emscripten_set_main_loop(loop, 0, 0);
 #else
-  // Not sure that this is the correct way to loop in sdl
-  for (;;) {
+  bool run = true;
+  SDL_Event e;
+  while (run) {
+    while (SDL_PollEvent(&e) != 0) {
+      if (e.type == SDL_QUIT) {
+        run = false;
+      }
+    }
     loop();
     SDL_GL_SwapWindow(win);
   }
