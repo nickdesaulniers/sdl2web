@@ -109,33 +109,56 @@ void loop () {
   draw();
 }
 
+struct SDL {
+  const int mStatus;
+  SDL (): mStatus(SDL_Init(SDL_INIT_VIDEO)) {}
+  ~SDL () {
+    SDL_Quit();
+  }
+};
+
+struct Win {
+  SDL_Window* const mWin;
+  Win (): mWin(SDL_CreateWindow("Hello World!", SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN)) {}
+  ~Win () {
+    if (mWin) SDL_DestroyWindow(mWin);
+  }
+};
+
+struct GL {
+  SDL_GLContext mgl;
+  GL (const Win& win) {
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    mgl = SDL_GL_CreateContext(win.mWin);
+    SDL_GL_SetSwapInterval(1);
+  }
+  ~GL () {
+    if (mgl) SDL_GL_DeleteContext(mgl);
+  }
+};
+
 int main () {
   std::cout << "hello world\n";
 
-  if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+  SDL sdl;
+  if (sdl.mStatus != 0) {
     std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
     return 1;
   }
 
-  auto win = SDL_CreateWindow("Hello World!", SDL_WINDOWPOS_CENTERED,
-      SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
-  if (win == nullptr) {
+  Win win;
+  if (win.mWin == nullptr) {
     std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
-    SDL_Quit();
     return 1;
   }
 
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-  auto gl = SDL_GL_CreateContext(win);
-  if (gl == nullptr) {
-    SDL_DestroyWindow(win);
+  GL gl(win);
+  if (gl.mgl == nullptr) {
     std::cout << "SDL_GL_CreateContext Error: " << SDL_GetError() << std::endl;
-    SDL_Quit();
     return 1;
   }
-
-  SDL_GL_SetSwapInterval(1);
 
   // TODO: Error handling
   load_program();
@@ -155,13 +178,8 @@ int main () {
       }
     }
     loop();
-    SDL_GL_SwapWindow(win);
+    SDL_GL_SwapWindow(win.mWin);
   }
 #endif
-
-  /* Delete our opengl context, destroy our window, and shutdown SDL */
-  SDL_GL_DeleteContext(gl);
-  SDL_DestroyWindow(win);
-  SDL_Quit();
 }
 
