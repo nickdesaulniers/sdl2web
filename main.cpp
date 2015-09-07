@@ -110,8 +110,11 @@ void loop () {
 }
 
 struct SDL {
-  const int mStatus;
-  SDL (): mStatus(SDL_Init(SDL_INIT_VIDEO)) {}
+  SDL () {
+    if ((SDL_Init(SDL_INIT_VIDEO)) != 0) {
+      throw std::string("Unable to initialize SDL: ") + std::string(SDL_GetError());
+    }
+  }
   ~SDL () {
     SDL_Quit();
   }
@@ -120,9 +123,16 @@ struct SDL {
 struct Win {
   SDL_Window* const mWin;
   Win (): mWin(SDL_CreateWindow("Hello World!", SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN)) {}
+        SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN)) {
+    if (mWin == nullptr) {
+      throw std::string("Unable to create a window: " + std::string(SDL_GetError()));
+    }
+  }
   ~Win () {
     if (mWin) SDL_DestroyWindow(mWin);
+  }
+  void swapBuffers () {
+    SDL_GL_SwapWindow(mWin);
   }
 };
 
@@ -131,8 +141,11 @@ struct GL {
   GL (const Win& win) {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-    mgl = SDL_GL_CreateContext(win.mWin);
     SDL_GL_SetSwapInterval(1);
+    mgl = SDL_GL_CreateContext(win.mWin);
+    if (mgl == nullptr) {
+      throw std::string("Unable to create GL Context: ") + std::string(SDL_GetError());
+    }
   }
   ~GL () {
     if (mgl) SDL_GL_DeleteContext(mgl);
@@ -140,31 +153,15 @@ struct GL {
 };
 
 int main () {
-  std::cout << "hello world\n";
-
   SDL sdl;
-  if (sdl.mStatus != 0) {
-    std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
-    return 1;
-  }
-
   Win win;
-  if (win.mWin == nullptr) {
-    std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
-    return 1;
-  }
-
   GL gl(win);
-  if (gl.mgl == nullptr) {
-    std::cout << "SDL_GL_CreateContext Error: " << SDL_GetError() << std::endl;
-    return 1;
-  }
 
   // TODO: Error handling
   load_program();
   load_buffers();
 
-  glClearColor ( 0.0, 1.0, 0.0, 1.0 );
+  glClearColor (0.0, 1.0, 0.0, 1.0);
 
 #ifdef __EMSCRIPTEN__
   emscripten_set_main_loop(loop, 0, 0);
@@ -178,7 +175,7 @@ int main () {
       }
     }
     loop();
-    SDL_GL_SwapWindow(win.mWin);
+    win.swapBuffers();
   }
 #endif
 }
