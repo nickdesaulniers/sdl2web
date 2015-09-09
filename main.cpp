@@ -6,8 +6,12 @@
 #elif __EMSCRIPTEN__
 #include <GLES2/gl2.h>
 #include "emscripten.h"
-#else
-#include <Gl/gl.h>
+#elif WIN32
+#include <GL/glew.h>
+// WTF
+#ifdef main
+#undef main
+#endif
 #endif
 
 
@@ -178,5 +182,6 @@ int main () {
     win.swapBuffers();
   }
 #endif
+  return 0;
 }
 
