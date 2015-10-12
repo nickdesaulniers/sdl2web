@@ -121,14 +121,26 @@ struct SDL {
 };
 
 class Win {
-  friend class GL;
   using Window = const std::unique_ptr<SDL_Window, decltype(&::SDL_DestroyWindow)>;
   Window mWin;
+  using GLContext = std::unique_ptr<void, decltype(&::SDL_GL_DeleteContext)>;
+  GLContext mGL;
 public:
-  Win (): mWin(SDL_CreateWindow("Hello World!", SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN), &::SDL_DestroyWindow) {
+  Win ():
+    mWin { SDL_CreateWindow("Hello World!", SDL_WINDOWPOS_CENTERED,
+            SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN),
+           &::SDL_DestroyWindow },
+    mGL { nullptr, &::SDL_GL_DeleteContext } {
     if (mWin == nullptr) {
       throw std::string("Unable to create a window: " + std::string(SDL_GetError()));
+    }
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    SDL_GL_SetSwapInterval(1);
+    GLContext tmp { SDL_GL_CreateContext(mWin.get()), &::SDL_GL_DeleteContext };
+    mGL = std::move(tmp);
+    if (mGL == nullptr) {
+      throw std::string("Unable to create GL Context: ") + std::string(SDL_GetError());
     }
   }
   void swapBuffers () {
@@ -136,24 +148,9 @@ public:
   }
 };
 
-class GL {
-  using GLContext = const std::unique_ptr<void, decltype(&::SDL_GL_DeleteContext)>;
-  GLContext mGL;
-public:
-  GL (const Win& win): mGL(SDL_GL_CreateContext(win.mWin.get()), &::SDL_GL_DeleteContext) {
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-    SDL_GL_SetSwapInterval(1);
-    if (mGL == nullptr) {
-      throw std::string("Unable to create GL Context: ") + std::string(SDL_GetError());
-    }
-  }
-};
-
 int main () {
   SDL sdl;
   Win win;
-  GL gl(win);
 
   // TODO: Error handling
   load_program();
