@@ -138,10 +138,10 @@ public:
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
     SDL_GL_SetSwapInterval(1);
     GLContext tmp { SDL_GL_CreateContext(mWin.get()), &::SDL_GL_DeleteContext };
-    mGL = std::move(tmp);
-    if (mGL == nullptr) {
+    if (tmp == nullptr) {
       throw std::string("Unable to create GL Context: ") + std::string(SDL_GetError());
     }
+    mGL = std::move(tmp);
   }
   void swapBuffers () {
     SDL_GL_SwapWindow(mWin.get());
