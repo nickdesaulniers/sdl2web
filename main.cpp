@@ -130,7 +130,7 @@ public:
     mWin { SDL_CreateWindow("Hello World!", SDL_WINDOWPOS_CENTERED,
             SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN),
            &::SDL_DestroyWindow },
-    mGL { nullptr, &::SDL_GL_DeleteContext } {
+    mGL { nullptr, nullptr } {
     if (mWin == nullptr) {
       throw std::string("Unable to create a window: " + std::string(SDL_GetError()));
     }
